@@ -1,0 +1,45 @@
+version: '3.3'
+services:
+  web:
+    container_name: "zeta_app"
+    build: ./app
+    command: python app.py run -h 0.0.0.0
+    volumes:
+      - ./app:/app
+    restart: always
+    ports:
+      - 5000:5000
+    expose:
+      - 5000
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfilenginx
+    container_name: "zeta_nginx"
+    ports:
+      - 90:80
+      - 443:443
+    restart: always
+    expose:
+      - 90
+    depends_on:
+      - web
+  db:
+    image: "postgres:11"
+    container_name: "zeta_postgres"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=zeta_db
+    restart: always
+    ports:
+      - "5432:5432"
+    command:
+      - "postgres"
+      - "-c"
+      - "wal_level=logical"
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+volumes:
+    postgres_data:
+    app:
